@@ -29,7 +29,7 @@ export default function Login() {
       const idToken = await user.getIdToken();
       
       // Send token to your backend
-      const response = await fetch(`moccasin-oyster-891779.hostingersite.com/api/auth/google`, {
+      const response = await fetch(`http://localhost:3000/api/auth/google`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -51,7 +51,7 @@ export default function Login() {
         description: "مرحباً بك في GrowUp!",
       });
       
-      navigate("/subscription");
+      navigate("/dashboard-app");
     } catch (error) {
       console.error('Google sign-in error:', error);
       toast({
@@ -104,7 +104,7 @@ export default function Login() {
         description: isLogin ? "مرحباً بك مجدداً!" : "مرحباً بك في GrowUp!",
       });
       
-      navigate("/subscription");
+      navigate("/dashboard-app");
     } catch (error) {
       console.error('Authentication error:', error);
       toast({

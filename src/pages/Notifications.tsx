@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { AppHeader } from "@/components/ui/AppHeader";
 import { Bell, Check } from "lucide-react";
@@ -6,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/sonner";
 
 const Notifications = () => {
-  // بيانات الإشعارات - يمكن أن تأتي من API في المستقبل
   const [notifications, setNotifications] = useState([
     {
       id: 1,
@@ -33,7 +31,6 @@ const Notifications = () => {
 
   const noNotifications = notifications.length === 0;
 
-  // وظيفة لتحديد الإشعار كمقروء
   const markAsRead = (id: number) => {
     setNotifications(
       notifications.map((notification) =>
@@ -42,7 +39,6 @@ const Notifications = () => {
     );
   };
 
-  // وظيفة لتحديد كل الإشعارات كمقروءة
   const markAllAsRead = () => {
     setNotifications(
       notifications.map((notification) => ({ ...notification, read: true }))
@@ -51,10 +47,10 @@ const Notifications = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background w-full">
       <AppHeader title="الإشعارات" showBackButton />
 
-      <div className="container mx-auto px-4 py-6">
+      <div className="px-4 py-6 w-full">
         {noNotifications ? (
           <div className="flex flex-col items-center justify-center mt-20 text-center">
             <div className="bg-muted p-6 rounded-full mb-6">
@@ -66,47 +62,57 @@ const Notifications = () => {
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-4 max-w-3xl mx-auto">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-lg font-bold">كل الإشعارات</h2>
-              <Button variant="ghost" className="text-sm" onClick={markAllAsRead}>تحديد الكل كمقروء</Button>
+              <Button variant="ghost" className="text-sm" onClick={markAllAsRead}>
+                تحديد الكل كمقروء
+              </Button>
             </div>
 
             {notifications.map((notification) => (
               <div
                 key={notification.id}
                 className={`p-4 border rounded-lg ${
-                  notification.read ? "bg-background" : "bg-muted/30"
-                }`}
+                  notification.read ? "bg-background" : "bg-gray-200" // Using bg-gray-50 (f1f5f9)
+                } transition-colors duration-200`} // Smooth background transition
                 onClick={() => markAsRead(notification.id)}
               >
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="font-bold">{notification.title}</h3>
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <h3 className={`font-bold ${
+                      notification.read ? "text-gray-700" : "text-gray-900" // Darker text for unread
+                    }`}>
+                      {notification.title}
+                    </h3>
+                    <p className={`text-sm mt-1 ${
+                      notification.read ? "text-muted-foreground" : "text-gray-600"
+                    }`}>
                       {notification.message}
                     </p>
                   </div>
                   {!notification.read && (
-                    <div className="h-2 w-2 rounded-full bg-growup"></div>
+                    <div className="h-2 w-2 rounded-full bg-growup mt-1.5"></div>
                   )}
                 </div>
                 <div className="flex justify-between items-center mt-2">
-                  <div className="text-xs text-muted-foreground">
+                  <div className={`text-xs ${
+                    notification.read ? "text-muted-foreground" : "text-gray-500"
+                  }`}>
                     {notification.time}
                   </div>
                   {!notification.read && (
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="p-1 h-auto" 
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="p-1 h-auto text-gray-500 hover:text-gray-700"
                       onClick={(e) => {
                         e.stopPropagation();
                         markAsRead(notification.id);
                       }}
                     >
                       <Check className="h-4 w-4" />
-                      <span className="text-xs">تم</span>
+                      <span className="text-xs mr-1">تم</span>
                     </Button>
                   )}
                 </div>
