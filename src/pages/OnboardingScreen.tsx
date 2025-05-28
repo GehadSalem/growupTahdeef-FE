@@ -152,7 +152,7 @@ export default function OnboardingScreen() {
             <p className="text-growup-text">اختر مجال عملك الحالي</p>
           </div>
           
-          <div className="flex flex-col gap-3 mb-8 max-h-64">
+          <div className="flex flex-col gap-3 mb-8 max-h-80 overflow-y-auto">
             {OCCUPATIONS.map((occupation) => (
               <button
                 key={occupation.id}

@@ -24,23 +24,23 @@ export default function Menu() {
   ];
   
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen w-full bg-gray-50">
       <AppHeader title="القائمة" showBackButton />
       
-      <div className="container mx-auto px-4 py-6">
-        <div className="max-w-lg mx-auto">
-          <div className="grid gap-4">
+      <div className="w-full px-4 py-6">
+        <div className="max-w-lg mx-auto w-full">
+          <div className="grid gap-4 w-full">
             {menuItems.map((item) => (
               <Button
                 key={item.id}
                 variant="outline"
-                className="flex items-center justify-start gap-4 h-auto p-4 border-gray-200 text-right"
+                className="flex items-center justify-start gap-4 h-auto p-4 border-gray-200 text-right w-full"
                 onClick={() => navigate(item.path)}
               >
                 <div className="p-2 bg-gray-100 rounded-full">
                   {item.icon}
                 </div>
-                <div className="text-right">
+                <div className="text-right flex-1">
                   <div className="font-bold text-base">{item.title}</div>
                   <div className="text-gray-500 text-sm">{item.description}</div>
                 </div>
@@ -49,13 +49,13 @@ export default function Menu() {
             
             <Button
               variant="outline"
-              className="flex items-center justify-start gap-4 h-auto p-4 border-red-200 text-red-600 hover:bg-red-50 text-right"
+              className="flex items-center justify-start gap-4 h-auto p-4 border-red-200 text-red-600 hover:bg-red-50 text-right w-full"
               onClick={() => navigate('/logout')}
             >
               <div className="p-2 bg-red-100 rounded-full">
                 <LogOut className="h-6 w-6 text-red-600" />
               </div>
-              <div className="text-right">
+              <div className="text-right flex-1">
                 <div className="font-bold text-base">تسجيل الخروج</div>
                 <div className="text-red-400 text-sm">تسجيل الخروج من التطبيق</div>
               </div>

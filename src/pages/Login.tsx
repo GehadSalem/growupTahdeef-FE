@@ -25,10 +25,8 @@ export default function Login() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       
-      // Get the Firebase ID token
       const idToken = await user.getIdToken();
       
-      // Send token to your backend
       const response = await fetch(`http://localhost:3000/api/auth/google`, {
         method: 'POST',
         headers: {
@@ -42,8 +40,6 @@ export default function Login() {
       }
 
       const { token } = await response.json();
-      
-      // Store the JWT token for future requests
       localStorage.setItem('token', token);
       
       toast({
@@ -118,12 +114,12 @@ export default function Login() {
   };
   
   return (
-    <div className="min-h-screen flex flex-col bg-growup-light">
-      <div className="flex flex-col flex-1 items-center justify-center p-8">
-        <div className="w-full max-w-md">
+    <div className="min-h-screen w-full bg-growup-light">
+      <div className="container mx-auto px-4 py-8 flex flex-col items-center justify-center min-h-screen">
+        <div className="w-full max-w-lg"> {/* Increased max-width */}
           <Logo size="lg" className="mx-auto mb-8" />
           
-          <div className="bg-white rounded-xl shadow-md p-8">
+          <div className="bg-white rounded-xl shadow-md p-8 w-full">
             <h1 className="text-2xl font-bold font-cairo mb-6 text-center">
               {isLogin ? "تسجيل الدخول" : "إنشاء حساب جديد"}
             </h1>

@@ -144,6 +144,13 @@ export const appRoutes: RouteObject[] = [
         <Subscription />
       </ProtectedRoute>
     ),
+  },{ 
+    path: '/menu', 
+    element: (
+      <ProtectedRoute>
+        <Menu />
+      </ProtectedRoute>
+    ),
   },
   { 
     path: '/profile', 
