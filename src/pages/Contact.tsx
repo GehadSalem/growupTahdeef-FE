@@ -1,17 +1,19 @@
-
 import { useState } from "react";
 import { AppHeader } from "@/components/ui/AppHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "@/components/ui/sonner";
-import { Label } from "@/components/ui/label";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { Mail, Send } from "lucide-react";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form, FormControl, FormField, FormItem,
+  FormLabel, FormMessage
+} from "@/components/ui/form";
+import api from "../../utils/api";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "الاسم يجب أن يحتوي على حرفين على الأقل" }),
@@ -24,7 +26,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 export default function Contact() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -37,19 +39,16 @@ export default function Contact() {
 
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
-    
+
     try {
-      // في تطبيق حقيقي، هنا سيتم إرسال البيانات إلى API
-      console.log("Support ticket data:", data);
-      
-      // محاكاة تأخير الشبكة
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      // ✅ إرسال البيانات إلى API
+      await api.post("/support/contact", data);
+
       toast.success("تم إرسال رسالتك بنجاح، سنتواصل معك قريباً");
       form.reset();
     } catch (error) {
       toast.error("حدث خطأ أثناء إرسال الرسالة، يرجى المحاولة مرة أخرى");
-      console.error("Error submitting support ticket:", error);
+      console.error("Error sending contact message:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -99,7 +98,7 @@ export default function Contact() {
                       )}
                     />
                   </div>
-                  
+
                   <FormField
                     control={form.control}
                     name="subject"
@@ -113,7 +112,7 @@ export default function Contact() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="message"
@@ -121,20 +120,20 @@ export default function Contact() {
                       <FormItem>
                         <FormLabel>الرسالة</FormLabel>
                         <FormControl>
-                          <Textarea 
-                            placeholder="اكتب رسالتك هنا..." 
-                            className="min-h-[150px]" 
-                            {...field} 
+                          <Textarea
+                            placeholder="اكتب رسالتك هنا..."
+                            className="min-h-[150px]"
+                            {...field}
                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  
+
                   <div className="flex justify-center pt-4">
-                    <Button 
-                      type="submit" 
+                    <Button
+                      type="submit"
                       className="w-full md:w-auto bg-growup hover:bg-growup/90"
                       disabled={isSubmitting}
                     >
@@ -153,7 +152,7 @@ export default function Contact() {
                   </div>
                 </form>
               </Form>
-              
+
               <div className="mt-6 pt-6 border-t border-gray-200 text-center">
                 <div className="flex items-center justify-center gap-2 text-growup">
                   <Mail className="h-5 w-5" />

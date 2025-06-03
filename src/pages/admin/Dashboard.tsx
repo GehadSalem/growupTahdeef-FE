@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Overview } from "@/components/admin/Overview";
@@ -10,6 +9,8 @@ import { StatsCards } from "@/components/admin/StatsCards";
 import { DateRangePicker } from "@/components/admin/DateRangePicker";
 import { AdminNav } from "@/components/admin/AdminNav";
 import { AdminHeader } from "@/components/admin/AdminHeader";
+import api from "../../../utils/api";
+import { toast } from "@/components/ui/sonner";
 
 export default function AdminDashboard() {
   const [dateRange, setDateRange] = useState({
@@ -17,12 +18,33 @@ export default function AdminDashboard() {
     to: new Date(),
   });
 
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => {
+    const fetchDashboardStats = async () => {
+      try {
+        const res = await api.get("/admin/dashboard", {
+          params: {
+            from: dateRange.from.toISOString(),
+            to: dateRange.to.toISOString(),
+          },
+        });
+        setStats(res.data);
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+        toast.error("فشل في تحميل بيانات لوحة التحكم");
+      }
+    };
+
+    fetchDashboardStats();
+  }, [dateRange]);
+
   return (
     <div className="flex min-h-screen bg-background">
       <AdminNav />
       <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
         <AdminHeader heading="لوحة التحكم" text="نظرة عامة على أداء التطبيق" />
-        
+
         <div className="flex items-center justify-between">
           <Tabs defaultValue="overview" className="space-y-4 w-full">
             <div className="flex items-center justify-between">
@@ -66,7 +88,7 @@ export default function AdminDashboard() {
                 </Card>
               </div>
             </TabsContent>
-            
+
             <TabsContent value="revenue" className="space-y-4">
               <StatsCards dateRange={dateRange} filter="revenue" />
               <Card>
