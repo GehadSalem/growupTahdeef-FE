@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   Table, 
@@ -165,97 +164,99 @@ export function ExpenseCategoriesManager() {
   
   return (
     <div className="space-y-4">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+      <Card className="text-right">
+        <CardHeader>
           <div>
             <CardTitle>فئات المصروفات</CardTitle>
             <CardDescription>
               إدارة الفئات المتاحة للمستخدمين لتصنيف مصروفاتهم
             </CardDescription>
           </div>
-          
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="gap-1">
-                <Plus className="h-4 w-4" />
-                فئة جديدة
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>
-                  {isEditMode ? "تعديل فئة المصروفات" : "إضافة فئة مصروفات جديدة"}
-                </DialogTitle>
-                <DialogDescription>
-                  {isEditMode 
-                    ? "قم بتعديل معلومات الفئة الحالية" 
-                    : "أدخل معلومات الفئة الجديدة التي ستضاف إلى التطبيق."}
-                </DialogDescription>
-              </DialogHeader>
-              
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="category-name">اسم الفئة</Label>
-                  <Input 
-                    id="category-name" 
-                    value={newCategory.name}
-                    onChange={(e) => setNewCategory({...newCategory, name: e.target.value})}
-                    placeholder="مثال: مصروفات الترفيه"
-                  />
-                </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex justify-end">
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="gap-1">
+                  <Plus className="h-4 w-4" />
+                  فئة جديدة
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>
+                    {isEditMode ? "تعديل فئة المصروفات" : "إضافة فئة مصروفات جديدة"}
+                  </DialogTitle>
+                  <DialogDescription>
+                    {isEditMode 
+                      ? "قم بتعديل معلومات الفئة الحالية" 
+                      : "أدخل معلومات الفئة الجديدة التي ستضاف إلى التطبيق."}
+                  </DialogDescription>
+                </DialogHeader>
                 
-                <div className="grid gap-2">
-                  <Label htmlFor="category-description">وصف الفئة</Label>
-                  <Input 
-                    id="category-description" 
-                    value={newCategory.description}
-                    onChange={(e) => setNewCategory({...newCategory, description: e.target.value})}
-                    placeholder="وصف قصير للفئة"
-                  />
-                </div>
-                
-                <div className="grid gap-2">
-                  <Label htmlFor="category-budget">الميزانية المقترحة</Label>
-                  <Input 
-                    id="category-budget" 
-                    type="number"
-                    value={newCategory.budget}
-                    onChange={(e) => setNewCategory({...newCategory, budget: Number(e.target.value)})}
-                    placeholder="مثال: 1000"
-                  />
-                </div>
-                
-                <div className="grid gap-2">
-                  <Label htmlFor="category-color">لون الفئة</Label>
-                  <div className="flex gap-2">
+                <div className="grid gap-4 py-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="category-name">اسم الفئة</Label>
                     <Input 
-                      id="category-color" 
-                      type="color"
-                      value={newCategory.color}
-                      onChange={(e) => setNewCategory({...newCategory, color: e.target.value})}
-                      className="w-12 h-10 p-1"
-                    />
-                    <Input 
-                      value={newCategory.color}
-                      onChange={(e) => setNewCategory({...newCategory, color: e.target.value})}
-                      className="flex-1"
+                      id="category-name" 
+                      value={newCategory.name}
+                      onChange={(e) => setNewCategory({...newCategory, name: e.target.value})}
+                      placeholder="مثال: مصروفات الترفيه"
                     />
                   </div>
+                  
+                  <div className="grid gap-2">
+                    <Label htmlFor="category-description">وصف الفئة</Label>
+                    <Input 
+                      id="category-description" 
+                      value={newCategory.description}
+                      onChange={(e) => setNewCategory({...newCategory, description: e.target.value})}
+                      placeholder="وصف قصير للفئة"
+                    />
+                  </div>
+                  
+                  <div className="grid gap-2">
+                    <Label htmlFor="category-budget">الميزانية المقترحة</Label>
+                    <Input 
+                      id="category-budget" 
+                      type="number"
+                      value={newCategory.budget}
+                      onChange={(e) => setNewCategory({...newCategory, budget: Number(e.target.value)})}
+                      placeholder="مثال: 1000"
+                    />
+                  </div>
+                  
+                  <div className="grid gap-2">
+                    <Label htmlFor="category-color">لون الفئة</Label>
+                    <div className="flex gap-2">
+                      <Input 
+                        id="category-color" 
+                        type="color"
+                        value={newCategory.color}
+                        onChange={(e) => setNewCategory({...newCategory, color: e.target.value})}
+                        className="w-12 h-10 p-1"
+                      />
+                      <Input 
+                        value={newCategory.color}
+                        onChange={(e) => setNewCategory({...newCategory, color: e.target.value})}
+                        className="flex-1"
+                      />
+                    </div>
+                  </div>
                 </div>
-              </div>
-              
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  إلغاء
-                </Button>
-                <Button onClick={handleAddCategory}>
-                  {isEditMode ? "حفظ التغييرات" : "إضافة الفئة"}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </CardHeader>
-        <CardContent>
+                
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                    إلغاء
+                  </Button>
+                  <Button onClick={handleAddCategory}>
+                    {isEditMode ? "حفظ التغييرات" : "إضافة الفئة"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+          
           <Table>
             <TableHeader>
               <TableRow>

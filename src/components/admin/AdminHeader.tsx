@@ -22,7 +22,7 @@ export function AdminHeader({ heading, text }: AdminHeaderProps) {
         <h1 className="font-bold text-2xl">{heading}</h1>
         {text && <p className="text-muted-foreground">{text}</p>}
       </div>
-      <div className="flex items-center gap-3">
+      {/* <div className="flex items-center gap-3">
         <Button variant="outline" size="icon" className="relative rounded-full">
           <Bell className="h-5 w-5" />
           <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-growup text-[10px] text-white">
@@ -52,7 +52,7 @@ export function AdminHeader({ heading, text }: AdminHeaderProps) {
             <DropdownMenuItem className="text-red-500">تسجيل الخروج</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      </div>
+      </div> */}
     </div>
   );
 }

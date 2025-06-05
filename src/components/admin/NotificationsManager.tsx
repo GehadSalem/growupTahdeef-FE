@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   Table, 
@@ -224,117 +223,117 @@ export function NotificationsManager() {
   
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>قوالب الإشعارات</CardTitle>
-            <CardDescription>
-              إنشاء وتعديل قوالب الإشعارات التي تظهر للمستخدمين
-            </CardDescription>
-          </div>
-          
-          <Dialog open={isTemplateDialogOpen} onOpenChange={setIsTemplateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="gap-1">
-                <Plus className="h-4 w-4" />
-                قالب جديد
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>
-                  {isEditMode ? "تعديل قالب الإشعار" : "إنشاء قالب إشعار جديد"}
-                </DialogTitle>
-                <DialogDescription>
-                  {isEditMode 
-                    ? "قم بتعديل محتوى قالب الإشعار الحالي" 
-                    : "أدخل تفاصيل قالب الإشعار الجديد الذي سيتم استخدامه في التطبيق."}
-                </DialogDescription>
-              </DialogHeader>
-              
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="notification-title">عنوان الإشعار</Label>
-                  <Input 
-                    id="notification-title" 
-                    value={newTemplate.title}
-                    onChange={(e) => setNewTemplate({...newTemplate, title: e.target.value})}
-                    placeholder="مثال: تذكير بتتبع المصروفات"
-                  />
-                </div>
+      <Card className="text-right">
+        <CardHeader>
+          <CardTitle>قوالب الإشعارات</CardTitle>
+          <CardDescription>
+            إنشاء وتعديل قوالب الإشعارات التي تظهر للمستخدمين
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex justify-end">
+            <Dialog open={isTemplateDialogOpen} onOpenChange={setIsTemplateDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="gap-1">
+                  <Plus className="h-4 w-4" />
+                  قالب جديد
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>
+                    {isEditMode ? "تعديل قالب الإشعار" : "إنشاء قالب إشعار جديد"}
+                  </DialogTitle>
+                  <DialogDescription>
+                    {isEditMode 
+                      ? "قم بتعديل محتوى قالب الإشعار الحالي" 
+                      : "أدخل تفاصيل قالب الإشعار الجديد الذي سيتم استخدامه في التطبيق."}
+                  </DialogDescription>
+                </DialogHeader>
                 
-                <div className="grid gap-2">
-                  <Label htmlFor="notification-content">محتوى الإشعار</Label>
-                  <Textarea 
-                    id="notification-content" 
-                    value={newTemplate.content}
-                    onChange={(e) => setNewTemplate({...newTemplate, content: e.target.value})}
-                    rows={3}
-                    placeholder="اكتب نص الإشعار هنا..."
-                  />
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="notification-type">نوع الإشعار</Label>
-                    <Select 
-                      value={newTemplate.type}
-                      onValueChange={(value) => setNewTemplate({...newTemplate, type: value})}
-                    >
-                      <SelectTrigger id="notification-type">
-                        <SelectValue placeholder="اختر نوع الإشعار" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="تذكير">تذكير</SelectItem>
-                        <SelectItem value="إشعار">إشعار</SelectItem>
-                        <SelectItem value="تهنئة">تهنئة</SelectItem>
-                        <SelectItem value="نظام">نظام</SelectItem>
-                      </SelectContent>
-                    </Select>
+                <div className="grid gap-4 py-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="notification-title">عنوان الإشعار</Label>
+                    <Input 
+                      id="notification-title" 
+                      value={newTemplate.title}
+                      onChange={(e) => setNewTemplate({...newTemplate, title: e.target.value})}
+                      placeholder="مثال: تذكير بتتبع المصروفات"
+                    />
                   </div>
                   
-                  <div className="space-y-2">
-                    <Label htmlFor="notification-trigger">وقت الإرسال</Label>
-                    <Select 
-                      value={newTemplate.trigger}
-                      onValueChange={(value) => setNewTemplate({...newTemplate, trigger: value})}
-                    >
-                      <SelectTrigger id="notification-trigger">
-                        <SelectValue placeholder="اختر وقت الإرسال" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="يومي">يومي</SelectItem>
-                        <SelectItem value="أسبوعي">أسبوعي</SelectItem>
-                        <SelectItem value="شهري">شهري</SelectItem>
-                        <SelectItem value="إنجاز">عند تحقيق هدف</SelectItem>
-                        <SelectItem value="تحديث">عند تحديث التطبيق</SelectItem>
-                      </SelectContent>
-                    </Select>
+                  <div className="grid gap-2">
+                    <Label htmlFor="notification-content">محتوى الإشعار</Label>
+                    <Textarea 
+                      id="notification-content" 
+                      value={newTemplate.content}
+                      onChange={(e) => setNewTemplate({...newTemplate, content: e.target.value})}
+                      rows={3}
+                      placeholder="اكتب نص الإشعار هنا..."
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="notification-type">نوع الإشعار</Label>
+                      <Select 
+                        value={newTemplate.type}
+                        onValueChange={(value) => setNewTemplate({...newTemplate, type: value})}
+                      >
+                        <SelectTrigger id="notification-type">
+                          <SelectValue placeholder="اختر نوع الإشعار" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="تذكير">تذكير</SelectItem>
+                          <SelectItem value="إشعار">إشعار</SelectItem>
+                          <SelectItem value="تهنئة">تهنئة</SelectItem>
+                          <SelectItem value="نظام">نظام</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="notification-trigger">وقت الإرسال</Label>
+                      <Select 
+                        value={newTemplate.trigger}
+                        onValueChange={(value) => setNewTemplate({...newTemplate, trigger: value})}
+                      >
+                        <SelectTrigger id="notification-trigger">
+                          <SelectValue placeholder="اختر وقت الإرسال" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="يومي">يومي</SelectItem>
+                          <SelectItem value="أسبوعي">أسبوعي</SelectItem>
+                          <SelectItem value="شهري">شهري</SelectItem>
+                          <SelectItem value="إنجاز">عند تحقيق هدف</SelectItem>
+                          <SelectItem value="تحديث">عند تحديث التطبيق</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2 space-x-reverse pt-2">
+                    <Switch 
+                      id="notification-status"
+                      checked={newTemplate.isActive}
+                      onCheckedChange={(checked) => setNewTemplate({...newTemplate, isActive: checked})}
+                    />
+                    <Label htmlFor="notification-status">تفعيل الإشعار</Label>
                   </div>
                 </div>
                 
-                <div className="flex items-center space-x-2 space-x-reverse pt-2">
-                  <Switch 
-                    id="notification-status"
-                    checked={newTemplate.isActive}
-                    onCheckedChange={(checked) => setNewTemplate({...newTemplate, isActive: checked})}
-                  />
-                  <Label htmlFor="notification-status">تفعيل الإشعار</Label>
-                </div>
-              </div>
-              
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsTemplateDialogOpen(false)}>
-                  إلغاء
-                </Button>
-                <Button onClick={handleAddTemplate}>
-                  {isEditMode ? "حفظ التغييرات" : "إنشاء القالب"}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </CardHeader>
-        <CardContent>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsTemplateDialogOpen(false)}>
+                    إلغاء
+                  </Button>
+                  <Button onClick={handleAddTemplate}>
+                    {isEditMode ? "حفظ التغييرات" : "إنشاء القالب"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+          
           <Table>
             <TableHeader>
               <TableRow>
@@ -397,104 +396,104 @@ export function NotificationsManager() {
       </Card>
       
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>الإشعارات المجدولة</CardTitle>
-            <CardDescription>
-              جدولة إرسال الإشعارات إلى المستخدمين في أوقات محددة
-            </CardDescription>
+        <CardHeader>
+          <CardTitle>الإشعارات المجدولة</CardTitle>
+          <CardDescription>
+            جدولة إرسال الإشعارات إلى المستخدمين في أوقات محددة
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex justify-end">
+            <Dialog open={isScheduleDialogOpen} onOpenChange={setIsScheduleDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="gap-1">
+                  <Calendar className="h-4 w-4" />
+                  جدولة إشعار
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>جدولة إشعار جديد</DialogTitle>
+                  <DialogDescription>
+                    اختر قالب الإشعار والجمهور المستهدف وموعد الإرسال.
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <div className="grid gap-4 py-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="template-select">قالب الإشعار</Label>
+                    <Select
+                      value={newScheduledNotification.templateId}
+                      onValueChange={(value) => setNewScheduledNotification({
+                        ...newScheduledNotification, 
+                        templateId: value
+                      })}
+                    >
+                      <SelectTrigger id="template-select">
+                        <SelectValue placeholder="اختر قالب" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {templates
+                          .filter(template => template.isActive)
+                          .map(template => (
+                            <SelectItem 
+                              key={template.id} 
+                              value={template.id.toString()}
+                            >
+                              {template.title}
+                            </SelectItem>
+                          ))
+                        }
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="grid gap-2">
+                    <Label htmlFor="audience-select">الجمهور المستهدف</Label>
+                    <Select
+                      value={newScheduledNotification.audience}
+                      onValueChange={(value) => setNewScheduledNotification({
+                        ...newScheduledNotification, 
+                        audience: value
+                      })}
+                    >
+                      <SelectTrigger id="audience-select">
+                        <SelectValue placeholder="اختر الجمهور المستهدف" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">جميع المستخدمين</SelectItem>
+                        <SelectItem value="active">المستخدمين النشطين</SelectItem>
+                        <SelectItem value="inactive">المستخدمين غير النشطين</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="grid gap-2">
+                    <Label htmlFor="schedule-date">موعد الإرسال</Label>
+                    <Input 
+                      id="schedule-date" 
+                      type="date" 
+                      value={newScheduledNotification.scheduledDate}
+                      onChange={(e) => setNewScheduledNotification({
+                        ...newScheduledNotification, 
+                        scheduledDate: e.target.value
+                      })}
+                    />
+                  </div>
+                </div>
+                
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsScheduleDialogOpen(false)}>
+                    إلغاء
+                  </Button>
+                  <Button onClick={handleScheduleNotification}>
+                    جدولة
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
           
-          <Dialog open={isScheduleDialogOpen} onOpenChange={setIsScheduleDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="gap-1">
-                <Calendar className="h-4 w-4" />
-                جدولة إشعار
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>جدولة إشعار جديد</DialogTitle>
-                <DialogDescription>
-                  اختر قالب الإشعار والجمهور المستهدف وموعد الإرسال.
-                </DialogDescription>
-              </DialogHeader>
-              
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="template-select">قالب الإشعار</Label>
-                  <Select
-                    value={newScheduledNotification.templateId}
-                    onValueChange={(value) => setNewScheduledNotification({
-                      ...newScheduledNotification, 
-                      templateId: value
-                    })}
-                  >
-                    <SelectTrigger id="template-select">
-                      <SelectValue placeholder="اختر قالب" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {templates
-                        .filter(template => template.isActive)
-                        .map(template => (
-                          <SelectItem 
-                            key={template.id} 
-                            value={template.id.toString()}
-                          >
-                            {template.title}
-                          </SelectItem>
-                        ))
-                      }
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="grid gap-2">
-                  <Label htmlFor="audience-select">الجمهور المستهدف</Label>
-                  <Select
-                    value={newScheduledNotification.audience}
-                    onValueChange={(value) => setNewScheduledNotification({
-                      ...newScheduledNotification, 
-                      audience: value
-                    })}
-                  >
-                    <SelectTrigger id="audience-select">
-                      <SelectValue placeholder="اختر الجمهور المستهدف" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">جميع المستخدمين</SelectItem>
-                      <SelectItem value="active">المستخدمين النشطين</SelectItem>
-                      <SelectItem value="inactive">المستخدمين غير النشطين</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="grid gap-2">
-                  <Label htmlFor="schedule-date">موعد الإرسال</Label>
-                  <Input 
-                    id="schedule-date" 
-                    type="date" 
-                    value={newScheduledNotification.scheduledDate}
-                    onChange={(e) => setNewScheduledNotification({
-                      ...newScheduledNotification, 
-                      scheduledDate: e.target.value
-                    })}
-                  />
-                </div>
-              </div>
-              
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsScheduleDialogOpen(false)}>
-                  إلغاء
-                </Button>
-                <Button onClick={handleScheduleNotification}>
-                  جدولة
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </CardHeader>
-        <CardContent>
           <Table>
             <TableHeader>
               <TableRow>

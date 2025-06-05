@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   Table, 
@@ -286,7 +285,7 @@ export function GoalsManager() {
   
   return (
     <div className="space-y-4">
-      <Card>
+      <Card  className="text-right">
         <CardHeader>
           <CardTitle>قوالب الأهداف المقترحة</CardTitle>
           <CardDescription>
@@ -300,13 +299,13 @@ export function GoalsManager() {
             onValueChange={setActiveTab}
             className="w-full"
           >
-            <div className="flex items-center justify-between">
-              <TabsList>
-                <TabsTrigger value="financial">أهداف مالية</TabsTrigger>
-                <TabsTrigger value="personal">أهداف شخصية</TabsTrigger>
-                <TabsTrigger value="career">أهداف مهنية</TabsTrigger>
-              </TabsList>
-              
+            <TabsList>
+              <TabsTrigger value="financial">أهداف مالية</TabsTrigger>
+              <TabsTrigger value="personal">أهداف شخصية</TabsTrigger>
+              <TabsTrigger value="career">أهداف مهنية</TabsTrigger>
+            </TabsList>
+            
+            <div className="flex justify-end mt-4">
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
                   <Button className="gap-1">

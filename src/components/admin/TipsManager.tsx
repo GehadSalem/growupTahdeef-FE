@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   Table, 
@@ -224,7 +223,7 @@ export function TipsManager() {
   
   return (
     <div className="space-y-4">
-      <Card>
+      <Card className="text-right">
         <CardHeader>
           <CardTitle>إدارة النصائح والإرشادات</CardTitle>
           <CardDescription>
@@ -238,13 +237,13 @@ export function TipsManager() {
             onValueChange={setActiveTab}
             className="w-full"
           >
-            <div className="flex items-center justify-between">
-              <TabsList>
-                <TabsTrigger value="financial">نصائح مالية</TabsTrigger>
-                <TabsTrigger value="selfDevelopment">تطوير الذات</TabsTrigger>
-                <TabsTrigger value="habitBreaking">كسر العادات</TabsTrigger>
-              </TabsList>
-              
+            <TabsList className="w-full">
+              <TabsTrigger value="financial" className="flex-1">نصائح مالية</TabsTrigger>
+              <TabsTrigger value="selfDevelopment" className="flex-1">تطوير الذات</TabsTrigger>
+              <TabsTrigger value="habitBreaking" className="flex-1">كسر العادات</TabsTrigger>
+            </TabsList>
+            
+            <div className="flex justify-end mt-4">
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
                   <Button className="gap-1">

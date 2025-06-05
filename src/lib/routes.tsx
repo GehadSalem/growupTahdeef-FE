@@ -1,13 +1,9 @@
 import { lazy, Suspense } from 'react';
 import { RouteObject, Navigate } from 'react-router-dom';
 import { AppSidebar } from '@/components/sidebar/AppSidebar';
-import { adminRoutes } from './admin-routes';
 import { Loading } from '@/components/shared/Loading';
 
-// ======================
-// Import Pages
-// ======================
-// Core pages (eager-loaded)
+// Core Pages
 import OnboardingScreen from '@/pages/OnboardingScreen';
 import Login from '@/pages/Login';
 import Menu from '@/pages/Menu';
@@ -21,48 +17,46 @@ import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
 import Contact from '@/pages/Contact';
 
-// Legal pages
+// Legal Pages
 import LegalMenu from '@/pages/legal/LegalMenu';
 import PrivacyPolicy from '@/pages/legal/PrivacyPolicy';
 import TermsOfService from '@/pages/legal/TermsOfService';
 import RefundPolicy from '@/pages/legal/RefundPolicy';
 
-// Lazy-loaded pages
+// Lazy Pages
 const Dashboard = lazy(() => import('@/pages/Dashboard'));
 const SelfDevelopment = lazy(() => import('@/pages/SelfDevelopment'));
 const BreakHabits = lazy(() => import('@/pages/BreakHabits'));
 const FinancialPlanning = lazy(() => import('@/pages/FinancialPlanning'));
 const MajorGoals = lazy(() => import('@/pages/MajorGoals'));
 
-// ======================
-// Protected Route Wrapper
-// ======================
+// Admin Lazy Pages
+const AdminDashboard = lazy(() => import('@/pages/admin/Dashboard'));
+const AdminUsers = lazy(() => import('@/pages/admin/Users'));
+const AdminSubscriptions = lazy(() => import('@/pages/admin/Subscriptions'));
+const AdminContent = lazy(() => import('@/pages/admin/Content'));
+const AdminSupport = lazy(() => import('@/pages/admin/Support'));
+const AdminSettings = lazy(() => import('@/pages/admin/Settings'));
+
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: 'user' | 'admin'; // Optional role-based access
+  requiredRole?: 'user' | 'admin';
 }
 
 const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
   const token = localStorage.getItem('token');
-  
-  // No token → Redirect to login
-  if (!token) {
-    return <Navigate to="/login" replace />;
-  }
+  const user = localStorage.getItem('user');
+  const userRole = user ? JSON.parse(user).role : null;
 
-  // Optional: Role-based access control
-  // (Assumes you store user roles in localStorage/JWT)
-  const userRole = localStorage.getItem('userRole'); // Replace with your role check logic
+  if (!token) return <Navigate to="/login" replace />;
+  
   if (requiredRole && userRole !== requiredRole) {
-    return <Navigate to="/not-authorized" replace />; // Or a 403 page
+    return <Navigate to={userRole === 'admin' ? '/admin' : '/not-authorized'} replace />;
   }
 
   return <>{children}</>;
 };
 
-// ======================
-// Layout Wrapper (with Sidebar)
-// ======================
 const withSidebar = (Component: React.ComponentType) => (
   <>
     <AppSidebar />
@@ -74,14 +68,11 @@ const withSidebar = (Component: React.ComponentType) => (
   </>
 );
 
-// ======================
-// Route Definitions
-// ======================
 export const appRoutes: RouteObject[] = [
-  // —— PUBLIC ROUTES (No token required) ——
+  // Public Routes
   { path: '/', element: <OnboardingScreen /> },
-  { 
-    path: '/login', 
+  {
+    path: '/login',
     element: localStorage.getItem('token') ? (
       <Navigate to="/dashboard-app" replace />
     ) : (
@@ -95,81 +86,83 @@ export const appRoutes: RouteObject[] = [
   { path: '/terms-of-service', element: <TermsOfService /> },
   { path: '/refund-policy', element: <RefundPolicy /> },
   { path: '/contact', element: <Contact /> },
+  { path: '/not-authorized', element: <div className="p-4 text-center">ليس لديك صلاحية الوصول إلى هذه الصفحة</div> },
 
-  // —— PROTECTED ROUTES (Token required) ——
-  { 
-    path: '/dashboard-app', 
+  // Protected Routes - User
+  {
+    path: '/dashboard-app',
     element: (
       <ProtectedRoute>
         {withSidebar(Dashboard)}
       </ProtectedRoute>
     ),
   },
-  { 
-    path: '/self-development', 
+  {
+    path: '/self-development',
     element: (
       <ProtectedRoute>
         {withSidebar(SelfDevelopment)}
       </ProtectedRoute>
     ),
   },
-  { 
-    path: '/break-habits', 
+  {
+    path: '/break-habits',
     element: (
       <ProtectedRoute>
         {withSidebar(BreakHabits)}
       </ProtectedRoute>
     ),
   },
-  { 
-    path: '/financial-planning', 
+  {
+    path: '/financial-planning',
     element: (
       <ProtectedRoute>
         {withSidebar(FinancialPlanning)}
       </ProtectedRoute>
     ),
   },
-  { 
-    path: '/major-goals', 
+  {
+    path: '/major-goals',
     element: (
       <ProtectedRoute>
         {withSidebar(MajorGoals)}
       </ProtectedRoute>
     ),
   },
-  { 
-    path: '/subscription', 
+  {
+    path: '/subscription',
     element: (
       <ProtectedRoute>
         <Subscription />
       </ProtectedRoute>
     ),
-  },{ 
-    path: '/menu', 
+  },
+  {
+    path: '/menu',
     element: (
       <ProtectedRoute>
         <Menu />
       </ProtectedRoute>
     ),
   },
-  { 
-    path: '/profile', 
+  {
+    path: '/profile',
     element: (
       <ProtectedRoute>
         <Profile />
       </ProtectedRoute>
     ),
   },
-  { 
-    path: '/notifications', 
+  {
+    path: '/notifications',
     element: (
       <ProtectedRoute>
         <Notifications />
       </ProtectedRoute>
     ),
   },
-  { 
-    path: '/referral', 
+  {
+    path: '/referral',
     element: (
       <ProtectedRoute>
         <Referral />
@@ -178,16 +171,56 @@ export const appRoutes: RouteObject[] = [
   },
   { path: '/logout', element: <Logout /> },
 
-  // —— ADMIN ROUTES (Token + Admin role required) ——
-  ...adminRoutes.map(route => ({
-    ...route,
+  // Protected Routes - Admin
+  {
+    path: '/admin',
     element: (
       <ProtectedRoute requiredRole="admin">
-        {route.element}
+        {withSidebar(AdminDashboard)}
       </ProtectedRoute>
     ),
-  })),
+  },
+  {
+    path: '/admin/users',
+    element: (
+      <ProtectedRoute requiredRole="admin">
+        {withSidebar(AdminUsers)}
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/admin/subscriptions',
+    element: (
+      <ProtectedRoute requiredRole="admin">
+        {withSidebar(AdminSubscriptions)}
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/admin/content',
+    element: (
+      <ProtectedRoute requiredRole="admin">
+        {withSidebar(AdminContent)}
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/admin/support',
+    element: (
+      <ProtectedRoute requiredRole="admin">
+        {withSidebar(AdminSupport)}
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/admin/settings',
+    element: (
+      <ProtectedRoute requiredRole="admin">
+        {withSidebar(AdminSettings)}
+      </ProtectedRoute>
+    ),
+  },
 
-  // —— 404 FALLBACK ——
+  // 404 Fallback
   { path: '*', element: <NotFound /> },
 ];

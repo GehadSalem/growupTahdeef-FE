@@ -8,6 +8,14 @@ import { useToast } from "@/hooks/use-toast";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 
+interface UserData {
+  id: string;
+  name: string;
+  email: string;
+  role: 'user' | 'admin';
+  avatar?: string;
+}
+
 export default function Login() {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -21,13 +29,25 @@ export default function Login() {
     message: string;
   } | null>(null);
 
-  // Check for existing token on component mount
+  // تحقق من وجود مستخدم مسجل الدخول عند تحميل المكون
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) {
-      navigate("/dashboard-app");
+    const userData = localStorage.getItem("user");
+    
+    if (token && userData) {
+      const user: UserData = JSON.parse(userData);
+      redirectBasedOnRole(user.role);
     }
   }, [navigate]);
+
+  // دالة مساعدة للتوجيه بناءً على الصلاحية
+  const redirectBasedOnRole = (role: 'user' | 'admin') => {
+    if (role === 'admin') {
+      navigate('/admin');
+    } else {
+      navigate('/dashboard-app');
+    }
+  };
 
   const signInWithGoogle = async () => {
     setIsLoading(true);
@@ -37,38 +57,36 @@ export default function Login() {
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-
       const idToken = await user.getIdToken();
 
       const response = await fetch(`http://localhost:3000/api/auth/google`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ idToken }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to authenticate with backend");
+        throw new Error("فشل المصادقة مع الخادم");
       }
 
-      const { token } = await response.json();
+      const { user: userData, token } = await response.json();
+      
+      // تخزين بيانات المستخدم والرمز
       localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(userData));
 
       toast({
         title: "تم تسجيل الدخول بنجاح",
         description: "مرحباً بك في GrowUp!",
       });
 
-      navigate("/dashboard-app");
+      // التوجيه بناءً على صلاحية المستخدم
+      redirectBasedOnRole(userData.role);
     } catch (error) {
-      console.error("Google sign-in error:", error);
+      console.error("خطأ في تسجيل الدخول عبر Google:", error);
       toast({
         title: "خطأ في تسجيل الدخول",
-        description:
-          error instanceof Error
-            ? error.message
-            : "حدث خطأ أثناء محاولة تسجيل الدخول",
+        description: error instanceof Error ? error.message : "حدث خطأ غير متوقع",
         variant: "destructive",
       });
     } finally {
@@ -84,7 +102,7 @@ export default function Login() {
     if (!email || !password || (!isLogin && !name)) {
       toast({
         title: "خطأ في البيانات",
-        description: "يرجى إدخال جميع البيانات المطلوبة",
+        description: "يرجى إدخال جميع الحقول المطلوبة",
         variant: "destructive",
       });
       setIsLoading(false);
@@ -97,56 +115,35 @@ export default function Login() {
 
       const response = await fetch(`http://localhost:3000/api${endpoint}`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-
-        if (errorData.errorType === "user_not_found") {
-          setAuthError({
-            type: "user_not_found",
-            message:
-              errorData.message ||
-              "لا يوجد حساب مرتبط بهذا البريد الإلكتروني. هل ترغب في إنشاء حساب جديد؟",
-          });
-        } else if (errorData.errorType === "invalid_password") {
-          setAuthError({
-            type: "invalid_password",
-            message:
-              errorData.message ||
-              "كلمة المرور غير صحيحة. يرجى المحاولة مرة أخرى.",
-          });
-        } else {
-          setAuthError({
-            type: "general_error",
-            message: errorData.message || "حدث خطأ أثناء محاولة تسجيل الدخول",
-          });
-        }
-
-        throw new Error(errorData.message || "Authentication failed");
+        handleAuthErrors(errorData);
+        throw new Error(errorData.message || "فشل عملية المصادقة");
       }
 
-      const data = await response.json();
-      localStorage.setItem("token", data.token);
+      const { user: userData, token } = await response.json();
+      
+      // تخزين بيانات المستخدم والرمز
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(userData));
 
       toast({
         title: isLogin ? "تم تسجيل الدخول بنجاح" : "تم إنشاء الحساب بنجاح",
         description: isLogin ? "مرحباً بك مجدداً!" : "مرحباً بك في GrowUp!",
       });
 
-      navigate("/dashboard-app");
+      // التوجيه بناءً على صلاحية المستخدم
+      redirectBasedOnRole(userData.role);
     } catch (error) {
-      console.error("Authentication error:", error);
-
+      console.error("خطأ في المصادقة:", error);
       if (!authError) {
         toast({
           title: "خطأ",
-          description:
-            error instanceof Error ? error.message : "حدث خطأ غير متوقع",
+          description: error instanceof Error ? error.message : "حدث خطأ غير متوقع",
           variant: "destructive",
         });
       }
@@ -155,14 +152,34 @@ export default function Login() {
     }
   };
 
-  const toggleAuthMode = () => {
-    const token = localStorage.getItem("token");
-    if (!isLogin && token) {
-      navigate("/dashboard-app");
+  // دالة مساعدة لمعالجة أخطاء المصادقة
+  const handleAuthErrors = (errorData: any) => {
+    if (errorData.errorType === "user_not_found") {
+      setAuthError({
+        type: "user_not_found",
+        message: "لا يوجد حساب مرتبط بهذا البريد الإلكتروني. هل ترغب في إنشاء حساب جديد؟",
+      });
+    } else if (errorData.errorType === "invalid_password") {
+      setAuthError({
+        type: "invalid_password",
+        message: "كلمة المرور غير صحيحة. يرجى المحاولة مرة أخرى.",
+      });
+    } else if (errorData.errorType === "email_exists") {
+      setAuthError({
+        type: "email_exists",
+        message: "البريد الإلكتروني مسجل بالفعل. يرجى تسجيل الدخول بدلاً من ذلك.",
+      });
     } else {
-      setIsLogin(!isLogin);
-      setAuthError(null);
+      setAuthError({
+        type: "general_error",
+        message: errorData.message || "حدث خطأ أثناء محاولة تسجيل الدخول",
+      });
     }
+  };
+
+  const toggleAuthMode = () => {
+    setIsLogin(!isLogin);
+    setAuthError(null);
   };
 
   return (
@@ -206,9 +223,7 @@ export default function Login() {
                   fill="#EA4335"
                 />
               </svg>
-              {isLogin
-                ? "تسجيل الدخول باستخدام Google"
-                : "التسجيل باستخدام Google"}
+              {isLogin ? "تسجيل الدخول باستخدام Google" : "التسجيل باستخدام Google"}
             </Button>
 
             <div className="relative my-6">
@@ -220,65 +235,43 @@ export default function Login() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               {authError && (
-                <div
-                  className={`p-3 rounded-md ${
-                    authError.type === "user_not_found"
-                      ? "bg-blue-50 text-blue-800"
-                      : "bg-red-50 text-red-800"
-                  } font-cairo text-sm`}
-                >
-                  {authError.message === "user_not_found" && (
-                    <button
-                      type="button"
-                      onClick={() => setIsLogin(false)}
-                      className="mr-2 font-bold hover:underline"
-                    >
-                      خطأ في بيانات التسجيل
-                      <div className="text-center mt-4">
-                        <button
-                          onClick={toggleAuthMode}
-                          className="text-growup hover:underline font-cairo"
-                          disabled={isLoading}
-                        >
-                          قم بالتسجيل الآن!
-                        </button>
-                      </div>
-                    </button>
+                <div className={`p-3 rounded-md ${
+                  authError.type === "user_not_found" ? "bg-blue-50 text-blue-800" : 
+                  authError.type === "email_exists" ? "bg-yellow-50 text-yellow-800" : 
+                  "bg-red-50 text-red-800"
+                } font-cairo text-sm`}>
+                  {authError.message}
+                  {authError.type === "user_not_found" && (
+                    <div className="text-center mt-2">
+                      <button
+                        onClick={toggleAuthMode}
+                        className="text-growup hover:underline font-cairo"
+                        disabled={isLoading}
+                      >
+                        إنشاء حساب جديد
+                      </button>
+                    </div>
                   )}
-                  {authError.message === "Invalid credentials" && (
-                    <button
-                      type="button"
-                      onClick={() => setIsLogin(false)}
-                      className="mr-2 font-bold hover:underline"
-                    >
-                      خطأ في بيانات التسجيل
-                      <div className="text-left">
-                        <Link
-                          to="/forgot-password"
-                          className="text-sm text-growup hover:underline font-cairo"
-                        >
-                          نسيت كلمة المرور؟
-                        </Link>
-                      </div>
-                    </button>
+                  {authError.type === "email_exists" && (
+                    <div className="text-center mt-2">
+                      <button
+                        onClick={() => setIsLogin(true)}
+                        className="text-growup hover:underline font-cairo"
+                        disabled={isLoading}
+                      >
+                        تسجيل الدخول
+                      </button>
+                    </div>
                   )}
-                  {authError.message === "Email already in use" && (
-                    <button
-                      type="button"
-                      onClick={() => setIsLogin(false)}
-                      className="mr-2 font-bold hover:underline"
-                    >
-                      المستخدم موجود !
-                      <div className="text-center mt-4">
-                        <button
-                          onClick={toggleAuthMode}
-                          className="text-growup hover:underline font-cairo"
-                          disabled={isLoading}
-                        >
-                          قم بتسجيل الدخول
-                        </button>
-                      </div>
-                    </button>
+                  {authError.type === "invalid_password" && (
+                    <div className="text-left mt-2">
+                      <Link
+                        to="/forgot-password"
+                        className="text-sm text-growup hover:underline font-cairo"
+                      >
+                        نسيت كلمة المرور؟
+                      </Link>
+                    </div>
                   )}
                 </div>
               )}
@@ -315,10 +308,7 @@ export default function Login() {
               </div>
 
               <div className="space-y-1">
-                <Label
-                  htmlFor="password"
-                  className="text-right block font-cairo"
-                >
+                <Label htmlFor="password" className="text-right block font-cairo">
                   كلمة المرور
                 </Label>
                 <Input
@@ -386,9 +376,7 @@ export default function Login() {
               className="text-growup hover:underline font-cairo"
               disabled={isLoading}
             >
-              {isLogin
-                ? "ليس لديك حساب؟ إنشاء حساب جديد"
-                : "لديك حساب بالفعل؟ تسجيل الدخول"}
+              {isLogin ? "ليس لديك حساب؟ إنشاء حساب جديد" : "لديك حساب بالفعل؟ تسجيل الدخول"}
             </button>
           </div>
         </div>

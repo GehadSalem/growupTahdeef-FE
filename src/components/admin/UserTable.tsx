@@ -1,11 +1,10 @@
-
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
 import {
   DropdownMenu,
@@ -16,7 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Mail, User, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface UserTableProps {
@@ -98,124 +97,186 @@ const users = [
     activity: "منخفض",
   }
 ];
-
 export function UserTable({ searchQuery, filterStatus }: UserTableProps) {
   const { toast } = useToast();
   
   const filteredUsers = users.filter(user => {
-    // تصفية حسب البحث
     const matchesSearch = 
       user.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
       user.email.toLowerCase().includes(searchQuery.toLowerCase());
-      
-    // تصفية حسب الحالة
     const matchesStatus = filterStatus.includes("الكل") || filterStatus.includes(user.status);
-    
     return matchesSearch && matchesStatus;
   });
   
-  const handleSendNotification = (userId: number) => {
+  const handleAction = (action: string, userId: number) => {
     toast({
-      title: "تم إرسال الإشعار",
-      description: `تم إرسال إشعار إلى المستخدم رقم ${userId}`,
+      title: `تم ${action}`,
+      description: `تم تنفيذ الإجراء على المستخدم رقم ${userId}`,
     });
   };
-  
+
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="w-[250px]">المستخدم</TableHead>
-          <TableHead>الحالة</TableHead>
-          <TableHead>تاريخ التسجيل</TableHead>
-          <TableHead>الاشتراك</TableHead>
-          <TableHead>مستوى النشاط</TableHead>
-          <TableHead className="text-left"></TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
+    <div className="space-y-4">
+      {/* عرض الجوال */}
+      <div className="md:hidden space-y-3">
         {filteredUsers.length > 0 ? (
           filteredUsers.map((user) => (
-            <TableRow key={user.id}>
-              <TableCell className="font-medium">
-                <div className="flex items-center space-x-2 space-x-reverse">
-                  <Avatar className="h-8 w-8">
+            <div key={user.id} className="rounded-lg border p-4 bg-card">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center space-x-3 space-x-reverse">
+                  <Avatar className="h-10 w-10">
                     <AvatarFallback>
-                      {user.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
+                      {user.name.split(" ").map(n => n[0]).join("")}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <div className="font-medium">{user.name}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {user.email}
+                    <h3 className="font-medium">{user.name}</h3>
+                    <p className="text-sm text-muted-foreground">{user.email}</p>
+                    <div className="flex items-center mt-1 space-x-2 space-x-reverse">
+                      <Badge 
+                        variant={user.status === "نشط" ? "default" : "outline"} 
+                        className={user.status === "نشط" ? "bg-green-500" : ""}
+                      >
+                        {user.status}
+                      </Badge>
+                      <Badge variant="outline" className="text-xs">
+                        {user.plan}
+                      </Badge>
                     </div>
                   </div>
                 </div>
-              </TableCell>
-              <TableCell>
-                <Badge
-                  variant={user.status === "نشط" ? "default" : "outline"}
-                  className={user.status === "نشط" ? "bg-green-500" : ""}
-                >
-                  {user.status}
-                </Badge>
-              </TableCell>
-              <TableCell>{user.registeredDate}</TableCell>
-              <TableCell>
-                <Badge 
-                  variant={user.plan === "تجريبي" ? "outline" : "default"} 
-                  className={user.plan === "سنوي" ? "bg-growup" : ""}
-                >
-                  {user.plan}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <div className="flex items-center">
-                  <div 
-                    className={`h-2 w-2 rounded-full mr-2 ${
-                      user.activity === "عالي"
-                        ? "bg-green-500"
-                        : user.activity === "متوسط"
-                        ? "bg-yellow-500"
-                        : "bg-red-500"
-                    }`} 
-                  />
-                  {user.activity}
-                </div>
-              </TableCell>
-              <TableCell>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
                       <MoreHorizontal className="h-4 w-4" />
-                      <span className="sr-only">القائمة</span>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => handleSendNotification(user.id)}>
+                    <DropdownMenuItem onClick={() => handleAction("إرسال إشعار", user.id)}>
+                      <Mail className="h-4 w-4 ml-2" />
                       إرسال إشعار
                     </DropdownMenuItem>
-                    <DropdownMenuItem>عرض التفاصيل</DropdownMenuItem>
-                    <DropdownMenuItem>تعديل</DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <User className="h-4 w-4 ml-2" />
+                      عرض التفاصيل
+                    </DropdownMenuItem>
                     <DropdownMenuItem className="text-red-500">
+                      <Lock className="h-4 w-4 ml-2" />
                       تعليق الحساب
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-              </TableCell>
-            </TableRow>
+              </div>
+              
+              <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+                <div className="flex items-center">
+                  <span className="text-muted-foreground">التسجيل:</span>
+                  <span className="mr-1">{user.registeredDate}</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-muted-foreground">النشاط:</span>
+                  <div className="flex items-center mr-1">
+                    <div 
+                      className={`h-2 w-2 rounded-full mr-1 ${
+                        user.activity === "عالي" ? "bg-green-500" :
+                        user.activity === "متوسط" ? "bg-yellow-500" : "bg-red-500"
+                      }`} 
+                    />
+                    {user.activity}
+                  </div>
+                </div>
+              </div>
+            </div>
           ))
         ) : (
-          <TableRow>
-            <TableCell colSpan={6} className="text-center py-6 text-muted-foreground">
-              لا توجد نتائج مطابقة للبحث
-            </TableCell>
-          </TableRow>
+          <div className="text-center py-8 text-muted-foreground">
+            لا توجد نتائج مطابقة للبحث
+          </div>
         )}
-      </TableBody>
-    </Table>
+      </div>
+
+      {/* عرض سطح المكتب */}
+      <div className="hidden md:block">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>المستخدم</TableHead>
+              <TableHead>الحالة</TableHead>
+              <TableHead>تاريخ التسجيل</TableHead>
+              <TableHead>الاشتراك</TableHead>
+              <TableHead>النشاط</TableHead>
+              <TableHead className="text-left"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredUsers.map((user) => (
+              <TableRow key={user.id}>
+                <TableCell>
+                  <div className="flex items-center space-x-2 space-x-reverse">
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback>
+                        {user.name.split(" ").map(n => n[0]).join("")}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="font-medium">{user.name}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {user.email}
+                      </div>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant={user.status === "نشط" ? "default" : "outline"}
+                    className={user.status === "نشط" ? "bg-green-500" : ""}
+                  >
+                    {user.status}
+                  </Badge>
+                </TableCell>
+                <TableCell>{user.registeredDate}</TableCell>
+                <TableCell>
+                  <Badge 
+                    variant={user.plan === "تجريبي" ? "outline" : "default"} 
+                    className={user.plan === "سنوي" ? "bg-growup" : ""}
+                  >
+                    {user.plan}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center">
+                    <div 
+                      className={`h-2 w-2 rounded-full mr-2 ${
+                        user.activity === "عالي" ? "bg-green-500" :
+                        user.activity === "متوسط" ? "bg-yellow-500" : "bg-red-500"
+                      }`} 
+                    />
+                    {user.activity}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => handleAction("إرسال إشعار", user.id)}>
+                        إرسال إشعار
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>عرض التفاصيل</DropdownMenuItem>
+                      <DropdownMenuItem className="text-red-500">
+                        تعليق الحساب
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
   );
 }
