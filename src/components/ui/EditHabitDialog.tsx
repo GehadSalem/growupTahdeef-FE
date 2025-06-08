@@ -1,4 +1,3 @@
-
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './dialog';
 import { Button } from './button';
 import { Label } from './label';
@@ -36,8 +35,8 @@ const DAYS_OF_WEEK = [
 interface EditHabitDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onEditHabit: (id: string, habit: {
-    title: string;
+  onEditHabit: (updatedHabit: {
+    name: string;
     category: string;
     frequency?: {
       type: 'daily' | 'weekly' | 'monthly';
@@ -45,56 +44,59 @@ interface EditHabitDialogProps {
       days?: number[];
       dayOfMonth?: number;
     };
-  }) => void;
+  }) => Promise<void>; // Changed to return Promise
   habit: Habit;
 }
 
 export function EditHabitDialog({ open, onOpenChange, onEditHabit, habit }: EditHabitDialogProps) {
-  const [title, setTitle] = useState(habit.title);
+  const [name, setName] = useState(habit.name);
   const [category, setCategory] = useState(habit.category);
-  const [frequencyType, setFrequencyType] = useState<'daily' | 'weekly' | 'monthly'>('daily');
-  const [selectedTime, setSelectedTime] = useState('09:00');
-  const [selectedDays, setSelectedDays] = useState<number[]>([]);
-  const [dayOfMonth, setDayOfMonth] = useState(1);
-  
-  // بتحديث القيم عندما يتغير العادة المرسلة للتعديل
+  const [frequencyType, setFrequencyType] = useState<'daily' | 'weekly' | 'monthly'>(habit.frequency?.type || 'daily');
+  const [selectedTime, setSelectedTime] = useState(habit.frequency?.time || '09:00');
+  const [selectedDays, setSelectedDays] = useState<number[]>(habit.frequency?.days || []);
+  const [dayOfMonth, setDayOfMonth] = useState(habit.frequency?.dayOfMonth || 1);
+  const [isLoading, setIsLoading] = useState(false);
+
   useEffect(() => {
-    setTitle(habit.title);
+    setName(habit.name);
     setCategory(habit.category);
     
     if (habit.frequency) {
       setFrequencyType(habit.frequency.type);
-      if (habit.frequency.time) {
-        setSelectedTime(habit.frequency.time);
-      }
-      if (habit.frequency.days) {
-        setSelectedDays(habit.frequency.days);
-      }
-      if (habit.frequency.dayOfMonth) {
-        setDayOfMonth(habit.frequency.dayOfMonth);
-      }
+      setSelectedTime(habit.frequency.time || '09:00');
+      setSelectedDays(habit.frequency.days || []);
+      setDayOfMonth(habit.frequency.dayOfMonth || 1);
     }
   }, [habit]);
-  
-  const handleSubmit = (e: React.FormEvent) => {
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (title.trim()) {
+    if (!name.trim()) return;
+
+    setIsLoading(true);
+    try {
       const updatedHabit = {
-        title,
+        name,
         category,
-        frequency: {
-          type: frequencyType,
-          time: selectedTime,
-          ...(frequencyType === 'weekly' && { days: selectedDays }),
-          ...(frequencyType === 'monthly' && { dayOfMonth }),
-        },
+        ...(frequencyType && {
+          frequency: {
+            type: frequencyType,
+            ...(selectedTime && { time: selectedTime }),
+            ...(frequencyType === 'weekly' && { days: selectedDays }),
+            ...(frequencyType === 'monthly' && { dayOfMonth }),
+          }
+        })
       };
-      
-      onEditHabit(habit.id, updatedHabit);
+
+      await onEditHabit(updatedHabit);
       onOpenChange(false);
+    } catch (error) {
+      console.error("Error editing habit:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
-  
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px] text-right font-cairo">
@@ -104,11 +106,11 @@ export function EditHabitDialog({ open, onOpenChange, onEditHabit, habit }: Edit
         
         <form onSubmit={handleSubmit} className="space-y-6 pt-4">
           <div className="space-y-2">
-            <Label htmlFor="habit-title" className="text-right block">اسم العادة</Label>
+            <Label htmlFor="habit-name" className="text-right block">اسم العادة</Label>
             <Input
-              id="habit-title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              id="habit-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               placeholder="مثال: قراءة 10 صفحات يومياً"
               className="input-field"
               required
@@ -134,7 +136,10 @@ export function EditHabitDialog({ open, onOpenChange, onEditHabit, habit }: Edit
           
           <div className="space-y-2">
             <Label htmlFor="frequency-type" className="text-right block">نوع التكرار</Label>
-            <Select value={frequencyType} onValueChange={(value: 'daily' | 'weekly' | 'monthly') => setFrequencyType(value)}>
+            <Select 
+              value={frequencyType} 
+              onValueChange={(value: 'daily' | 'weekly' | 'monthly') => setFrequencyType(value)}
+            >
               <SelectTrigger id="frequency-type">
                 <SelectValue placeholder="اختر نوع التكرار" />
               </SelectTrigger>
@@ -146,7 +151,6 @@ export function EditHabitDialog({ open, onOpenChange, onEditHabit, habit }: Edit
             </Select>
           </div>
           
-          {/* حقول إضافية حسب نوع التكرار */}
           {frequencyType === 'daily' && (
             <div className="space-y-2">
               <Label htmlFor="daily-time" className="text-right block">الوقت اليومي</Label>
@@ -219,13 +223,15 @@ export function EditHabitDialog({ open, onOpenChange, onEditHabit, habit }: Edit
             <Button 
               type="submit" 
               className="bg-growup hover:bg-growup-dark"
+              disabled={isLoading}
             >
-              حفظ التغييرات
+              {isLoading ? "جاري الحفظ..." : "حفظ التغييرات"}
             </Button>
             <Button 
               type="button" 
               variant="ghost" 
               onClick={() => onOpenChange(false)}
+              disabled={isLoading}
             >
               إلغاء
             </Button>

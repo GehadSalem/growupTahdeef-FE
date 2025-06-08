@@ -8,11 +8,10 @@
  * نوع العادة اليومية
  */
 export interface Habit {
+  name: any;
   id: string;
-  title: string;
   category: string;
   completed: boolean;
-  icon: string;
   frequency?: {
     type: 'daily' | 'weekly' | 'monthly';
     time?: string;

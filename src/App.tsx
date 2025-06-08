@@ -8,6 +8,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { appRoutes } from "@/lib/routes";
 import { Suspense } from "react";
 
+
 // إنشاء عميل للاستعلامات
 const queryClient = new QueryClient({
   defaultOptions: {

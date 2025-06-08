@@ -13,6 +13,7 @@ export default function Dashboard() {
     toggleHabitComplete, 
     addHabit, 
     deleteHabit,
+    editHabit,
     calculateDailyProgress
   } = useHabits();
   
@@ -39,6 +40,7 @@ export default function Dashboard() {
           onHabitComplete={toggleHabitComplete}
           onHabitDelete={deleteHabit}
           onAddHabit={addHabit}
+          onHabitEdit={editHabit}
         />
         
         {/* اقتباس تحفيزي */}

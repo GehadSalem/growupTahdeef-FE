@@ -1,18 +1,18 @@
 import { useState, useEffect } from "react";
 import { useToast } from "./use-toast";
 import { Habit } from "@/lib/types";
-import axios from "axios";
+import api from "@/utils/api";
 
 export function useHabits() {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
   const { toast } = useToast();
-  
-  // Fetch habits from backend on initial load
+
   useEffect(() => {
     const fetchHabits = async () => {
       try {
-        const response = await axios.get('/api/habits');
+        const response = await api.get("/habits");
         setHabits(response.data);
       } catch (error) {
         toast({
@@ -25,161 +25,193 @@ export function useHabits() {
         setLoading(false);
       }
     };
-    
+
     fetchHabits();
   }, []);
 
-  // حساب التقدم اليومي
   const calculateDailyProgress = () => {
-    const completedHabits = habits.filter(habit => habit.completed).length;
-    return habits.length > 0 ? Math.round((completedHabits / habits.length) * 100) : 0;
+    const completedHabits = habits.filter((habit) => habit.completed).length;
+    return habits.length > 0
+      ? Math.round((completedHabits / habits.length) * 100)
+      : 0;
   };
 
-  // تغيير حالة العادة (مكتملة/غير مكتملة)
   const toggleHabitComplete = async (id: string) => {
-    try {
-      // Optimistic UI update
-      setHabits(habits.map(habit => 
-        habit.id === id ? { ...habit, completed: !habit.completed } : habit
-      ));
-      
-      // Send request to backend
-      await axios.patch(`/api/habits/${id}/complete`);
-      
-      // إظهار رسالة نجاح عند إكمال العادة
-      const habit = habits.find(h => h.id === id);
-      if (habit && !habit.completed) {
-        toast({
-          title: "أحسنت! 👏",
-          description: `لقد أكملت "${habit.title}"`,
-        });
-      }
-    } catch (error) {
-      // Revert on error
-      setHabits(habits.map(habit => 
-        habit.id === id ? { ...habit, completed: !habit.completed } : habit
-      ));
-      
-      toast({
-        title: "خطأ",
-        description: "فشل في تحديث حالة العادة",
-        variant: "destructive",
-      });
-      console.error("Error toggling habit completion:", error);
-    }
-  };
-  
-  // إضافة عادة جديدة
-  const addHabit = async (habitData: { 
-    title: string; 
+  const originalHabits = [...habits];
+  try {
+    // Find the habit first
+    const habitToUpdate = habits.find(habit => habit.id === id);
+    if (!habitToUpdate) return;
+
+    // Create the updated data
+    const updatedData = { completed: !habitToUpdate.completed };
+
+    // Optimistic update
+    setHabits(
+      habits.map((habit) =>
+        habit.id === id ? { ...habit, ...updatedData } : habit
+      )
+    );
+
+    // Send the actual update with the new completed status
+    await api.patch(`/habits/${id}`, updatedData);
+
+    // Show different toast based on new state
+    toast({
+      title: !habitToUpdate.completed ? "أحسنت! 👏" : "تم الإلغاء",
+      description: !habitToUpdate.completed 
+        ? `لقد أكملت "${habitToUpdate.name}"`
+        : `لقد ألغيت إكمال "${habitToUpdate.name}"`,
+    });
+  } catch (error) {
+    // Revert on error
+    setHabits(originalHabits);
+    toast({
+      title: "خطأ",
+      description: "فشل في تحديث حالة العادة",
+      variant: "destructive",
+    });
+    console.error("Error toggling habit completion:", error);
+  }
+};
+
+  const addHabit = async (habitData: {
+    name: string;
     category: string;
     frequency: {
-      type: 'daily' | 'weekly' | 'monthly';
+      type: "daily" | "weekly" | "monthly";
       time?: string;
       days?: number[];
       dayOfMonth?: number;
     };
   }) => {
     try {
-      const response = await axios.post('/api/habits', habitData);
-      
+      const response = await api.post("/habits", habitData);
       setHabits([...habits, response.data]);
-      
       toast({
         title: "تمت الإضافة",
         description: "تم إضافة عادة جديدة بنجاح",
       });
-    } catch (error) {
+      return response.data;
+    } catch (error: any) {
       toast({
         title: "خطأ",
-        description: "فشل في إضافة العادة",
+        description: error.response?.data?.message || "فشل في إضافة العادة",
         variant: "destructive",
       });
       console.error("Error adding habit:", error);
+      throw error;
     }
   };
-  
-  // تعديل عادة
-  const editHabit = async (id: string, habitData: { 
-    title: string; 
-    category: string;
-    frequency?: {
-      type: 'daily' | 'weekly' | 'monthly';
-      time?: string;
-      days?: number[];
-      dayOfMonth?: number;
-    };
-  }) => {
+
+  const editHabit = async (
+    id: string,
+    habitData: {
+      name: string;
+      category: string;
+      frequency?: {
+        type: "daily" | "weekly" | "monthly";
+        time?: string;
+        days?: number[];
+        dayOfMonth?: number;
+      };
+    }
+  ) => {
+    const originalHabits = [...habits];
     try {
-      const response = await axios.put(`/api/habits/${id}`, habitData);
+      // Optimistic update
+      setHabits(
+        habits.map((habit) =>
+          habit.id === id ? { ...habit, ...habitData } : habit
+        )
+      );
+
+      const response = await api.put(`/habits/${id}`, habitData);
       
-      setHabits(habits.map(habit => 
-        habit.id === id ? response.data : habit
-      ));
-      
+      // Update with server response
+      setHabits(
+        habits.map((habit) =>
+          habit.id === id ? response.data : habit
+        )
+      );
+
+      // Update selected habit if it's the one being edited
+      if (selectedHabit?.id === id) {
+        setSelectedHabit(response.data);
+      }
+
       toast({
         title: "تم التعديل",
         description: "تم تعديل العادة بنجاح",
       });
-    } catch (error) {
+      return response.data;
+    } catch (error: any) {
+      // Revert on error
+      setHabits(originalHabits);
       toast({
         title: "خطأ",
-        description: "فشل في تعديل العادة",
+        description: error.response?.data?.message || "فشل في تعديل العادة",
         variant: "destructive",
       });
       console.error("Error editing habit:", error);
+      throw error;
     }
   };
-  
-  // حذف عادة
+
   const deleteHabit = async (id: string) => {
+    const originalHabits = [...habits];
     try {
-      await axios.delete(`/api/habits/${id}`);
+      // Optimistic update
+      setHabits(habits.filter((habit) => habit.id !== id));
       
-      setHabits(habits.filter(habit => habit.id !== id));
+      await api.delete(`/habits/${id}`);
       
+      // Clear selected habit if it's the one being deleted
+      if (selectedHabit?.id === id) {
+        setSelectedHabit(null);
+      }
+
       toast({
         title: "تم الحذف",
         description: "تم حذف العادة بنجاح",
       });
-    } catch (error) {
+      return true;
+    } catch (error: any) {
+      // Revert on error
+      setHabits(originalHabits);
       toast({
         title: "خطأ",
-        description: "فشل في حذف العادة",
+        description: error.response?.data?.message || "فشل في حذف العادة",
         variant: "destructive",
       });
       console.error("Error deleting habit:", error);
+      return false;
     }
   };
-  
-  // الحصول على أيقونة مناسبة للفئة
-  const getIconForCategory = (category: string) => {
-    const icons: {[key: string]: string} = {
-      'learning': '📚',
-      'health': '🧘‍♂️',
-      'productivity': '⏱️',
-      'finance': '💰',
-      'social': '👥',
-      'other': '✨',
-      'تعلم': '📚',
-      'صحة': '🧘‍♂️',
-      'إنتاجية': '⏱️',
-      'مالي': '💰',
-      'اجتماعي': '👥',
-      'أخرى': '✨',
-    };
-    
-    return icons[category] || '📝';
+
+
+
+  // Function to select a habit by ID
+  const selectHabit = (id: string) => {
+    const habit = habits.find(h => h.id === id);
+    setSelectedHabit(habit || null);
   };
 
-  return { 
-    habits, 
+  // Function to clear the selected habit
+  const clearSelectedHabit = () => {
+    setSelectedHabit(null);
+  };
+
+  return {
+    habits,
     loading,
-    toggleHabitComplete, 
+    selectedHabit,
+    selectHabit,
+    clearSelectedHabit,
+    toggleHabitComplete,
     addHabit,
-    editHabit, 
-    deleteHabit, 
-    getIconForCategory,
-    calculateDailyProgress
+    editHabit,
+    deleteHabit,
+    calculateDailyProgress,
   };
 }
