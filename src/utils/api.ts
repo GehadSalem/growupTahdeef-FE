@@ -3,7 +3,7 @@ import axios from 'axios';
 const SECRET_PREFIX = 'yoursecretkey__';
 
 const api = axios.create({
-  baseURL: `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api`,
+  baseURL: `${import.meta.env.VITE_API_URL || 'http://localhost:5000' || 'https://api.growupe.com'}/api`,
 });
 
 api.interceptors.request.use(
